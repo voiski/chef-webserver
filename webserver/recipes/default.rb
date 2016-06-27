@@ -21,7 +21,7 @@ execute 'mv /etc/apache2/sites-enabled/000-default /etc/apache2/sites-available/
 end
 
 node.default['webserver']['sites'].each do |site_name, site_data|
-  template '/etc/apache2/sites-enabled/#{site_name}.conf' do
+  template "/etc/apache2/sites-enabled/#{site_name}.conf" do
     source 'virtual.conf.erb'
     mode '0644'
     variables(
@@ -35,7 +35,9 @@ node.default['webserver']['sites'].each do |site_name, site_data|
   end
 end
 
-service 'apache2' { action  [:enable, :restart] }
+service 'apache2' do
+  action  [:enable, :restart]
+end
 
 
 

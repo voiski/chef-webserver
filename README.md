@@ -92,7 +92,7 @@ execute 'mv /etc/apache2/sites-enabled/000-default /etc/apache2/sites-available/
 end
 
 node.default['webserver']['sites'].each do |site_name, site_data|
-  template '/etc/apache2/sites-enabled/#{site_name}.conf' do
+  template "/etc/apache2/sites-enabled/#{site_name}.conf" do
     source 'virtual.conf.erb'
     mode '0644'
     variables(
@@ -106,7 +106,9 @@ node.default['webserver']['sites'].each do |site_name, site_data|
   end
 end
 
-service 'apache2' { action  [:enable, :restart] }
+service 'apache2' do
+  action  [:enable, :restart]
+end
 ```
 
 - **chef** :hocho: [manual] Add step to load the resources of the sites at *webserver/recipes/default.rb*
@@ -123,14 +125,15 @@ node.default['webserver']['sites'].keys.each do |site_name|
 end
 ```
 
-- **node** :stew: vagrant up
+- **node** :stew: vagrant reload
 
 
 
 
 ### 3th Final, accessing the sites
-
-- sudo sed -i '$ a 127.0.0.1 chef-site.avenuecode.com chef-portal.avenuecode.com' /etc/hosts
+- **node** :stew: sudo sed -i '/.* chef-portal.avenuecode.com/d' /etc/hosts
+- **node** :stew: new_ip=$(vagrant ssh -c "ip address show eth1 | grep 'inet ' | sed -e 's/^.*inet //' -e 's/\/.*$//'")
+- **node** :stew: sudo sed -i "$ a ${new_ip//[^([:alnum:]|\.)]/} chef-site.avenuecode.com chef-portal.avenuecode.com" /etc/hosts
 
 > Then check the result on the browser for both links:
 > - http://chef-site.avenuecode.com/
