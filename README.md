@@ -86,19 +86,22 @@ package 'mysql-server-5.6'
 ```ruby
 package 'apache2'
 
-execute 'mv /etc/apache2/sites-enabled/000-default /etc/apache2/sites-available/000-default' do
+execute 'rm /etc/apache2/sites-enabled/000-default' do
   only_if { File.exist? '/etc/apache2/sites-enabled/000-default' }
   notifies :restart, 'service[apache2]'
 end
 
 node.default['webserver']['sites'].each do |site_name, site_data|
-  template "/etc/apache2/sites-enabled/#{site_name}.conf" do
+  template "/etc/apache2/sites-available/#{site_name}.conf" do
     source 'virtual.conf.erb'
     mode '0644'
     variables(
       :document_root => site_data[:document_root],
       :fqdn => site_data[:fqdn]
     )
+  end
+  link "/etc/apache2/sites-enabled/#{site_name}.conf" do
+    to "../sites-available/#{site_name}.conf"
   end
   directory site_data[:document_root] do
     mode '0755'
